@@ -31,6 +31,15 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
 });
 
+console.log("Bot process started - checking TOKEN...");
+
+if (!process.env.TOKEN) {
+    console.error("❌ TOKEN is MISSING!");
+    process.exit(1); // stop the bot if no token
+} else {
+    console.log("✅ TOKEN detected, proceeding...");
+}
+
 let userData = {};
 let weeklyResetAt = Date.now() + WEEK_DURATION;
 
@@ -158,4 +167,5 @@ const app = express();
 app.get("/", (req, res) => res.send("Bot running"));
 
 app.listen(process.env.PORT || 3000);
+
 
