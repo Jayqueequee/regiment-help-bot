@@ -1,3 +1,7 @@
+console.log("TOKEN is", process.env.TOKEN ? "SET" : "MISSING");
+console.log("CLIENT_ID is", process.env.CLIENT_ID ? "SET" : "MISSING");
+console.log("GUILD_ID is", process.env.GUILD_ID ? "SET" : "MISSING");
+
 const {
   Client,
   GatewayIntentBits,
@@ -146,4 +150,5 @@ client.login(TOKEN);
 
 const app = express();
 app.get("/", (req, res) => res.send("Bot running"));
+
 app.listen(process.env.PORT || 3000);
