@@ -146,9 +146,16 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.login(TOKEN);
+try {
+  client.login(TOKEN)
+    .then(() => console.log("✅ Bot login attempt sent"))
+    .catch(err => console.error("❌ Bot failed to login:", err));
+} catch(err) {
+  console.error("❌ Unexpected error during login:", err);
+}
 
 const app = express();
 app.get("/", (req, res) => res.send("Bot running"));
 
 app.listen(process.env.PORT || 3000);
+
