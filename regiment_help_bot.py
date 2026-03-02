@@ -38,19 +38,37 @@ except FileNotFoundError:
     
 # Leaderboard commands
 
-@bot.slash_command(name="leaderboard", description="Lifetime leaderboard")
-async def leaderboard(ctx):
+@bot.tree.command(name="leaderboard", description="Lifetime leaderboard")
+async def leaderboard(interaction: discord.Interaction):
     users = data["users"]
     sorted_users = sorted(users.items(), key=lambda x: x[1].get("total", 0), reverse=True)
-    text = "\n".join([f"**{i+1}.** <@{uid}> — {u['total']}" for i, (uid, u) in enumerate(sorted_users[:10])])
-    await ctx.respond(f"🏆 Lifetime Leaderboard\n\n{text or 'No data.'}")
 
-@bot.slash_command(name="weekly", description="Weekly leaderboard")
-async def weekly(ctx):
+    if not sorted_users:
+        await interaction.response.send_message("No data yet.")
+        return
+
+    text = "\n".join(
+        [f"**{i+1}.** <@{uid}> — {u.get('total',0)}"
+         for i, (uid, u) in enumerate(sorted_users[:10])]
+    )
+
+    await interaction.response.send_message(f"🏆 Lifetime Leaderboard\n\n{text}")
+
+@bot.tree.command(name="weekly", description="Weekly leaderboard")
+async def weekly(interaction: discord.Interaction):
     users = data["users"]
     sorted_users = sorted(users.items(), key=lambda x: x[1].get("weekly", 0), reverse=True)
-    text = "\n".join([f"**{i+1}.** <@{uid}> — {u['weekly']}" for i, (uid, u) in enumerate(sorted_users[:10])])
-    await ctx.respond(f"🔥 Weekly Leaderboard\n\n{text or 'No data.'}")
+
+    if not sorted_users:
+        await interaction.response.send_message("No data yet.")
+        return
+
+    text = "\n".join(
+        [f"**{i+1}.** <@{uid}> — {u.get('weekly',0)}"
+         for i, (uid, u) in enumerate(sorted_users[:10])]
+    )
+
+    await interaction.response.send_message(f"🔥 Weekly Leaderboard\n\n{text}")
     
 
 # -------------------------
