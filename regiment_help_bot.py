@@ -6,6 +6,7 @@ from discord.ext import commands, tasks
 from flask import Flask
 import json
 import asyncio
+import webserver
 from datetime import datetime, timedelta
 
 # -------------------------
@@ -19,18 +20,8 @@ TOP_ROLE_ID = int(os.environ.get("TOP_ROLE_ID", 0))
 if not TOKEN or not GUILD_ID or not ROLE_ID or not TOP_ROLE_ID:
     raise ValueError("One or more environment variables are missing!")
 
-# -------------------------
-# Flask server for Render
-# -------------------------
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Bot is running ✅"
-
-# -------------------------
 # Discord bot setup
-# -------------------------
+
 intents = discord.Intents.default()
 intents.guilds = True
 intents.members = True
@@ -43,10 +34,10 @@ try:
         data = json.load(f)
 except FileNotFoundError:
     data = {"users": {}, "weekly_reset": str(datetime.utcnow() + timedelta(days=7))}
-
-# -------------------------
+    
+    
 # Leaderboard commands
-# -------------------------
+
 @bot.slash_command(name="leaderboard", description="Lifetime leaderboard")
 async def leaderboard(ctx):
     users = data["users"]
@@ -60,6 +51,7 @@ async def weekly(ctx):
     sorted_users = sorted(users.items(), key=lambda x: x[1].get("weekly", 0), reverse=True)
     text = "\n".join([f"**{i+1}.** <@{uid}> — {u['weekly']}" for i, (uid, u) in enumerate(sorted_users[:10])])
     await ctx.respond(f"🔥 Weekly Leaderboard\n\n{text or 'No data.'}")
+    
 
 # -------------------------
 # On ready
@@ -95,17 +87,5 @@ async def save_loop():
 
 save_loop.start()
 
-# -------------------------
-# Run Flask in background
-# -------------------------
-import threading
-def run_flask():
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
-
-threading.Thread(target=run_flask).start()
-
-# -------------------------
-# Run Discord bot
-# -------------------------
+webserver.keep_alive()
 bot.run(TOKEN)
