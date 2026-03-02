@@ -5,6 +5,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 import json
+import webserver
 from datetime import datetime, timedelta
 
 # -------------------------
@@ -266,4 +267,5 @@ async def maintenance_loop():
 # Run the bot
 # -------------------------
 if __name__ == "__main__":
+    webserver.keep_alive()
     bot.run(TOKEN)
