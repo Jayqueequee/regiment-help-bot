@@ -68,12 +68,16 @@ const rest = new REST({ version: '10' }).setToken(TOKEN);
 })();
 
 // 7️⃣ Discord login with debug
-console.log("Starting Discord bot login...");
-client.login(TOKEN)
-  .then(() => console.log("✅ Bot login attempt sent"))
-  .catch(err => console.error("❌ Bot failed to login:", err));
+console.log("Attempting bot login...");
+try {
+  client.login(TOKEN)
+    .then(() => console.log("✅ Bot login attempt sent"))
+    .catch(err => console.error("❌ Bot failed to login:", err));
+} catch (err) {
+  console.error("❌ Unexpected error during login:", err);
+}
 
-client.once(Events.ClientReady, () => {
+client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
@@ -126,3 +130,4 @@ setInterval(async () => {
 
   saveData();
 }, 60*1000);
+
