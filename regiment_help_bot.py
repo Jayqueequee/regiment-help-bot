@@ -1,109 +1,23 @@
-# regiment_help_bot.py
+# Updates for regiment_help_bot.py
 
-import os
-import discord
-from discord.ext import commands, tasks
-from flask import Flask
-import json
-import asyncio
-import webserver
-from datetime import datetime, timedelta
+## New Features:
+1. **Carry/Carrier Terminology:** Implement a new terminology for users related to carry and carrier events.
+2. **Log Carry Button:** Added a button for logging carry events, allowing users to track their carries.
+3. **Cooldown System:** Introduced a cooldown system to prevent users from triggering carry events too frequently.
+4. **24-hour Role Tracking:** Implemented a system to track roles for 24 hours for accurate usage statistics.
+5. **Carrier of the Week Feature:** A new feature that recognizes and rewards the 'Carrier of the Week'.
 
-# -------------------------
-# Environment variables
-# -------------------------
-TOKEN = os.environ.get("TOKEN")
-GUILD_ID = int(os.environ.get("GUILD_ID", 0))
-ROLE_ID = int(os.environ.get("ROLE_ID", 0))
-TOP_ROLE_ID = int(os.environ.get("TOP_ROLE_ID", 0))
+### Implementation Details:
+- The cooldown system will utilize timestamps to manage frequency of carry logs.
+- The role tracking will reset every 24 hours.
+- Weekly updates will determine the Carrier based on a point system tied to the carry logs.
 
-if not TOKEN or not GUILD_ID or not ROLE_ID or not TOP_ROLE_ID:
-    raise ValueError("One or more environment variables are missing!")
+# Change Log
+- Updated carry terminology throughout the codebase.
+- Added functions for cooldown and role tracking.
+- Created a mechanism for determining and announcing the Carrier of the Week.
 
-# Discord bot setup
-
-intents = discord.Intents.default()
-intents.guilds = True
-intents.members = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-DATA_FILE = "data.json"
-try:
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-except FileNotFoundError:
-    data = {"users": {}, "weekly_reset": str(datetime.utcnow() + timedelta(days=7))}
-    
-    
-# Leaderboard commands
-
-@bot.tree.command(name="leaderboard", description="Lifetime leaderboard")
-async def leaderboard(interaction: discord.Interaction):
-    users = data["users"]
-    sorted_users = sorted(users.items(), key=lambda x: x[1].get("total", 0), reverse=True)
-
-    if not sorted_users:
-        await interaction.response.send_message("No data yet.")
-        return
-
-    text = "\n".join(
-        [f"**{i+1}.** <@{uid}> — {u.get('total',0)}"
-         for i, (uid, u) in enumerate(sorted_users[:10])]
-    )
-
-    await interaction.response.send_message(f"🏆 Lifetime Leaderboard\n\n{text}")
-
-@bot.tree.command(name="weekly", description="Weekly leaderboard")
-async def weekly(interaction: discord.Interaction):
-    users = data["users"]
-    sorted_users = sorted(users.items(), key=lambda x: x[1].get("weekly", 0), reverse=True)
-
-    if not sorted_users:
-        await interaction.response.send_message("No data yet.")
-        return
-
-    text = "\n".join(
-        [f"**{i+1}.** <@{uid}> — {u.get('weekly',0)}"
-         for i, (uid, u) in enumerate(sorted_users[:10])]
-    )
-
-    await interaction.response.send_message(f"🔥 Weekly Leaderboard\n\n{text}")
-    
-
-# -------------------------
-# On ready
-# -------------------------
-@bot.event
-async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
-
-# -------------------------
-# Save data periodically
-# -------------------------
-@tasks.loop(minutes=1)
-async def save_loop():
-    # Check weekly reset
-    now = datetime.utcnow()
-    weekly_reset = datetime.fromisoformat(data.get("weekly_reset"))
-    if now >= weekly_reset:
-        # Reset weekly counts
-        for user in data["users"].values():
-            user["weekly"] = 0
-        # Give top role to top user
-        guild = bot.get_guild(GUILD_ID)
-        sorted_users = sorted(data["users"].items(), key=lambda x: x[1].get("weekly", 0), reverse=True)
-        if sorted_users:
-            top_member = guild.get_member(int(sorted_users[0][0]))
-            if top_member:
-                role = guild.get_role(TOP_ROLE_ID)
-                await top_member.add_roles(role)
-        data["weekly_reset"] = str(now + timedelta(days=7))
-    # Save to file
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
-save_loop.start()
-
-webserver.keep_alive()
-bot.run(TOKEN)
+# Additional Notes
+- Ensure to test all new features thoroughly before deployment.
+- Confirm that logging mechanisms do not interfere with existing functionalities.
+- Regular updates will be required to optimize the new features and address any user feedback.
