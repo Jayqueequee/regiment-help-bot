@@ -19,6 +19,11 @@ CARRIER_OF_WEEK_ROLE_ID = int(os.environ.get("CARRIER_OF_WEEK_ROLE_ID", 0))
 if not TOKEN or not GUILD_ID or not CARRIER_ROLE_ID or not CARRIER_OF_WEEK_ROLE_ID:
     raise ValueError("One or more environment variables are missing!")
 
+println(TOKEN)
+println(GUILD_ID)
+println(CARRIER_ROLE_ID)
+println(CARRIER_OF_WEEK_ROLE_ID)
+
 # Discord bot setup
 intents = discord.Intents.default()
 intents.guilds = True
