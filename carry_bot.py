@@ -271,6 +271,6 @@ async def maintenance_loop():
 # -------------------------
 # Run the bot
 # -------------------------
-if __name__ == "__main__":
-    webserver.keep_alive()
-    bot.run(TOKEN)
+
+webserver.keep_alive()
+bot.run(TOKEN)
